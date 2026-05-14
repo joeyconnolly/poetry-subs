@@ -12,6 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.3.3"
+    "@types/papaparse": "^5.5.2",
+    "astro": "^6.3.3",
+    "papaparse": "^5.5.3"
   }
 }

@@ -1,17 +1,188 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
 
+const mags = await getCollection('magazines');
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Poetry Submissions Index">
+	<header class="site-header">
+		<h1>UK & Irish Poetry Submissions</h1>
+		<span class="meta-info">Live Database</span>
+	</header>
+
+	<!-- The Filter Bar -->
+	<div class="filter-bar">
+		<div class="filter-group">
+			<label for="filter-status">Status</label>
+			<select id="filter-status">
+				<option value="all">All Markets</option>
+				<option value="open">Currently Open</option>
+				<option value="soon">Opening Soon</option>
+				<option value="closed">Closed</option>
+				<option value="unknown">Unknown</option>
+			</select>
+		</div>
+
+		<div class="filter-group">
+			<label for="filter-region">Region</label>
+			<select id="filter-region">
+				<option value="all">Any Region</option>
+				<option value="UK">UK</option>
+				<option value="Ireland">Ireland</option>
+			</select>
+		</div>
+
+		<div class="filter-group">
+			<label for="filter-pays">Payment</label>
+			<select id="filter-pays">
+				<option value="all">All</option>
+				<option value="true">Paying Markets Only</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="directory-header">
+		<span class="col-name">Publication</span>
+		<span class="col-status">Status</span>
+		<span class="col-meta">Details</span>
+	</div>
+
+	<ul class="directory-list" id="magazine-list">
+		{mags.map((mag) => (
+			<li class="directory-item" 
+				data-status={mag.data.status.toLowerCase()} 
+				data-region={mag.data.region} 
+				data-pays={mag.data.pays !== undefined ? mag.data.pays.toString() : 'unknown'}>
+				
+				<div class="col-name">
+					<!-- If there's a URL, make it a link. If not, just show the name. -->
+					<h2>
+						{mag.data.url ? (
+							<a href={mag.data.url} target="_blank">{mag.data.name} ↗</a>
+						) : (
+							<span>{mag.data.name}</span>
+						)}
+					</h2>
+					<!-- Only render description if it exists -->
+					{mag.data.description && <p class="desc">{mag.data.description}</p>}
+				</div>
+				
+				<div class="col-status">
+					<span class={`status badge-${mag.data.status.toLowerCase()}`}>{mag.data.status}</span>
+					{mag.data.deadline && <span class="deadline">Ends: {mag.data.deadline}</span>}
+				</div>
+				
+				<div class="col-meta">
+					<!-- Only show region tag if it's not 'Unknown' -->
+					{mag.data.region !== 'Unknown' && <span class="tag">{mag.data.region}</span>}
+					
+					<!-- Only show pay tag if the data actually exists (isn't blank) -->
+					{mag.data.pays !== undefined && (
+						<span class={`tag ${mag.data.pays ? 'tag-pays' : ''}`}>{mag.data.pays ? "Pays" : "No Pay"}</span>
+					)}
+					
+					{mag.data.fee && <span class="tag tag-fee">Fee</span>}
+				</div>
+			</li>
+		))}
+	</ul>
+</Layout>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
+		const filterRegion = document.getElementById('filter-region') as HTMLSelectElement;
+		const filterPays = document.getElementById('filter-pays') as HTMLSelectElement;
+		const items = document.querySelectorAll('.directory-item');
+
+		function updateFilters() {
+			const statusVal = filterStatus.value;
+			const regionVal = filterRegion.value;
+			const paysVal = filterPays.value;
+
+			items.forEach((item) => {
+				const li = item as HTMLElement;
+				const itemStatus = li.getAttribute('data-status');
+				const itemRegion = li.getAttribute('data-region');
+				const itemPays = li.getAttribute('data-pays');
+
+				const matchesStatus = statusVal === 'all' || itemStatus === statusVal;
+				const matchesRegion = regionVal === 'all' || itemRegion === regionVal;
+				const matchesPays = paysVal === 'all' || itemPays === paysVal;
+
+				if (matchesStatus && matchesRegion && matchesPays) {
+					li.style.display = 'flex';
+				} else {
+					li.style.display = 'none';
+				}
+			});
+		}
+
+		filterStatus.addEventListener('change', updateFilters);
+		filterRegion.addEventListener('change', updateFilters);
+		filterPays.addEventListener('change', updateFilters);
+	});
+</script>
+
+<style>
+	/* Header */
+	.site-header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--text); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+	.site-header h1 { font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+	.meta-info { color: var(--muted); font-size: 0.8rem; }
+
+	/* Upgraded Filter Bar Styles */
+	.filter-bar { 
+		display: flex; gap: 1.5rem; margin-bottom: 2rem; 
+		background-color: #ffffff; 
+		padding: 1rem 1.5rem; 
+		border: 1px solid var(--border); 
+		border-radius: 6px;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+	}
+	.filter-group { display: flex; flex-direction: column; gap: 0.3rem; }
+	.filter-group label { 
+		font-size: 0.65rem; font-weight: 600; text-transform: uppercase; 
+		letter-spacing: 0.05em; color: var(--muted); 
+	}
+	.filter-group select { 
+		appearance: none; -webkit-appearance: none;
+		background-color: var(--bg); 
+		border: 1px solid var(--border); 
+		border-radius: 4px; 
+		padding: 0.4rem 2rem 0.4rem 0.75rem; 
+		font-family: 'Inter', sans-serif; font-size: 0.85rem; 
+		color: var(--text); cursor: pointer; outline: none; 
+		/* Custom elegant dropdown chevron */
+		background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23555555%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 1em;
+		transition: all 0.2s ease;
+	}
+	.filter-group select:focus, .filter-group select:hover { 
+		border-color: var(--text); 
+		background-color: #ffffff;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+	}
+
+	/* Directory Structure */
+	.directory-header { display: flex; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0; }
+	.directory-list { list-style: none; padding: 0; margin: 0; }
+	.directory-item { display: flex; align-items: flex-start; padding: 0.8rem 0; border-bottom: 1px solid var(--border); transition: background-color 0.2s; }
+	.directory-item:hover { background-color: rgba(0,0,0,0.02); }
+	.col-name { flex: 2; padding-right: 1.5rem; }
+	.col-status { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+	.col-meta { flex: 1; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-end; }
+	.col-name h2 { font-size: 1.25rem; }
+	.desc { margin: 0.2rem 0 0 0; color: var(--muted); font-size: 0.85rem; }
+	.status { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+	.badge-open { color: #166534; }
+	.badge-closed { color: var(--accent); }
+	.badge-soon { color: #b45309; }
+	.badge-unknown { color: var(--muted); } 
+	.deadline { font-size: 0.8rem; color: var(--muted); }
+	.tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; background: #f0eee4; border-radius: 3px; color: var(--muted); white-space: nowrap; }
+	.tag-pays { background: #e6f4ea; color: #166534; border: 1px solid #bbf7d0; }
+	.tag-fee { background: #fee2e2; color: var(--accent); border: 1px solid #fecaca;}
+</style>
