@@ -8,10 +8,19 @@ const magazines = defineCollection({
     const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
     
     return parsed.data.map((row: any, index) => {
-      // Helper function: if a cell is blank, make it officially 'undefined' so Astro ignores it
+      // Basic string cleaner
       const cleanString = (val: string) => (val && val.trim() !== '') ? val.trim() : undefined;
       
-      // Helper function for booleans: handles blanks gracefully
+      // Smart URL cleaner: adds https:// if it's missing!
+      const cleanUrl = (val: string) => {
+        let url = cleanString(val);
+        if (!url) return undefined;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          return `https://${url}`;
+        }
+        return url;
+      };
+      
       const cleanBool = (val: string) => {
         if (!val || val.trim() === '') return undefined;
         return val.toUpperCase() === 'TRUE';
@@ -19,9 +28,8 @@ const magazines = defineCollection({
 
       return {
         id: `mag-${index}`,
-        name: row.name, // Still strictly required!
-        url: cleanString(row.url),
-        // If status is blank, default it to 'Unknown'
+        name: row.name,
+        url: cleanUrl(row.url), // Using our new smart cleaner here
         status: cleanString(row.status) || 'Unknown',
         deadline: cleanString(row.deadline),
         region: cleanString(row.region) || 'Unknown',
