@@ -199,4 +199,54 @@ mags.sort((a, b) => {
 	.tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; background: #f0eee4; border-radius: 3px; color: var(--muted); white-space: nowrap; }
 	.tag-pays { background: #e6f4ea; color: #166534; border: 1px solid #bbf7d0; }
 	.tag-fee { background: #fee2e2; color: var(--accent); border: 1px solid #fecaca;}
+
+	/* =========================================
+	   RESPONSIVE DESIGN (Tablet & Mobile)
+	   ========================================= */
+	@media (max-width: 768px) {
+		/* 0. The "Safe Area" - stops text from touching the physical glass */
+		body {
+			padding: 0 1.25rem;
+		}
+
+		/* 1. Stack the filter dropdowns and make them tap-friendly */
+		.filter-bar {
+			flex-direction: column;
+			gap: 1rem;
+			padding: 1.25rem;
+		}
+		.filter-group select {
+			width: 100%; /* Full width for easy thumb tapping */
+		}
+
+		/* 2. Hide the desktop column headers */
+		.directory-header {
+			display: none;
+		}
+
+		/* 3. Turn the horizontal rows into vertical "cards" */
+		.directory-item {
+			flex-direction: column;
+			gap: 0.75rem;
+			padding: 1.5rem 0; /* We keep 0 here because the 'body' rule above now handles the sides! */
+		}
+		
+		/* 4. Reset column widths and alignment */
+		.col-name, .col-status, .col-meta {
+			flex: none;
+			width: 100%;
+			padding-right: 0;
+			justify-content: flex-start;
+		}
+		
+		/* 5. Clean up mobile spacing */
+		.col-status {
+			flex-direction: row; 
+			align-items: center;
+			gap: 1rem;
+		}
+		.col-name h2 { 
+			font-size: 1.15rem; 
+		}
+	}
 </style>
