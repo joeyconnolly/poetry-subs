@@ -36,6 +36,7 @@ const magazines = defineCollection({
         pays: cleanBool(row.pays),
         fee: cleanBool(row.fee),
         description: cleanString(row.description),
+        notes: cleanString(row.notes),
       };
     });
   },
@@ -49,6 +50,7 @@ const magazines = defineCollection({
     pays: z.boolean().optional(),
     fee: z.boolean().optional(),
     description: z.string().optional(),
+    notes: z.string().optional(),
   }),
 });
 
