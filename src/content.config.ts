@@ -4,6 +4,9 @@ import Papa from 'papaparse';
 const magazines = defineCollection({
   loader: async () => {
     const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vRkw6mteGQklx8wEbEp--YGfEnxndCo-oajtv1NoGW88KW-_GtsG2K9PeIJ0n2BoJjAiWzgdy7SdWvQ/pub?output=csv');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
+    }
     const csvText = await response.text();
     const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
     
@@ -26,11 +29,19 @@ const magazines = defineCollection({
         return val.toUpperCase() === 'TRUE';
       };
 
+      const normalizeStatus = (val: string) => {
+        const cleaned = cleanString(val);
+        if (!cleaned) return 'Unknown';
+        const formatted = cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
+        const allowedStatuses = ['Open', 'Closed', 'Soon', 'Unknown'];
+        return allowedStatuses.includes(formatted) ? formatted : 'Unknown';
+      };
+
       return {
         id: `mag-${index}`,
         name: row.name,
         url: cleanUrl(row.url), // Using our new smart cleaner here
-        status: cleanString(row.status) || 'Unknown',
+        status: normalizeStatus(row.status),
         deadline: cleanString(row.deadline),
         region: cleanString(row.region) || 'Unknown',
         pays: cleanBool(row.pays),

@@ -72,7 +72,7 @@ mags.sort((a, b) => {
                     <h2 class="mag-title">
                         {/* Your robust URL logic */}
                         {mag.data.url ? (
-                            <a href={mag.data.url} target="_blank">{mag.data.name}&nbsp;<span class="arrow">↗</span></a>
+                            <a href={mag.data.url} target="_blank" rel="noopener noreferrer">{mag.data.name}&nbsp;<span class="arrow">↗</span></a>
                         ) : (
                             <span>{mag.data.name}</span>
                         )}
@@ -114,39 +114,37 @@ mags.sort((a, b) => {
 </Layout>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
-        const filterRegion = document.getElementById('filter-region') as HTMLSelectElement;
-        const filterPays = document.getElementById('filter-pays') as HTMLSelectElement;
-        const items = document.querySelectorAll('.directory-item');
+    const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
+    const filterRegion = document.getElementById('filter-region') as HTMLSelectElement;
+    const filterPays = document.getElementById('filter-pays') as HTMLSelectElement;
+    const items = document.querySelectorAll('.directory-item');
 
-        function updateFilters() {
-            const statusVal = filterStatus.value;
-            const regionVal = filterRegion.value;
-            const paysVal = filterPays.value;
+    function updateFilters() {
+        const statusVal = filterStatus.value;
+        const regionVal = filterRegion.value;
+        const paysVal = filterPays.value;
 
-            items.forEach((item) => {
-                const li = item as HTMLElement;
-                const itemStatus = li.getAttribute('data-status');
-                const itemRegion = li.getAttribute('data-region');
-                const itemPays = li.getAttribute('data-pays');
+        items.forEach((item) => {
+            const li = item as HTMLElement;
+            const itemStatus = li.getAttribute('data-status');
+            const itemRegion = li.getAttribute('data-region');
+            const itemPays = li.getAttribute('data-pays');
 
-                const matchesStatus = statusVal === 'all' || itemStatus === statusVal;
-                const matchesRegion = regionVal === 'all' || itemRegion === regionVal;
-                const matchesPays = paysVal === 'all' || itemPays === paysVal;
+            const matchesStatus = statusVal === 'all' || itemStatus === statusVal;
+            const matchesRegion = regionVal === 'all' || itemRegion === regionVal;
+            const matchesPays = paysVal === 'all' || itemPays === paysVal;
 
-                if (matchesStatus && matchesRegion && matchesPays) {
-                    li.style.display = 'flex';
-                } else {
-                    li.style.display = 'none';
-                }
-            });
-        }
+            if (matchesStatus && matchesRegion && matchesPays) {
+                li.style.display = 'flex';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    }
 
-        filterStatus.addEventListener('change', updateFilters);
-        filterRegion.addEventListener('change', updateFilters);
-        filterPays.addEventListener('change', updateFilters);
-    });
+    filterStatus.addEventListener('change', updateFilters);
+    filterRegion.addEventListener('change', updateFilters);
+    filterPays.addEventListener('change', updateFilters);
 </script>
 
 <style>
