@@ -30,7 +30,7 @@ mags.sort((a, b) => {
 		<div class="filter-group">
 			<label for="filter-status">Status</label>
 			<select id="filter-status">
-				<option value="all">All Markets</option>
+				<option value="all">All Magazines</option>
 				<option value="open">Currently Open</option>
 				<option value="soon">Opening Soon</option>
 				<option value="closed">Closed</option>
@@ -51,7 +51,7 @@ mags.sort((a, b) => {
 			<label for="filter-pays">Payment</label>
 			<select id="filter-pays">
 				<option value="all">All</option>
-				<option value="true">Paying Markets Only</option>
+				<option value="true">Paying Magazines Only</option>
 			</select>
 		</div>
 	</div>
@@ -93,7 +93,7 @@ mags.sort((a, b) => {
 					
 					<!-- Only show pay tag if the data actually exists (isn't blank) -->
 					{mag.data.pays !== undefined && (
-						<span class={`tag ${mag.data.pays ? 'tag-pays' : ''}`}>{mag.data.pays ? "Pays" : "No Pay"}</span>
+						<span class={`tag ${mag.data.pays ? 'tag-pays' : ''}`}>{mag.data.pays ? "Pays" : "Doesn't Pay"}</span>
 					)}
 					
 					{mag.data.fee && <span class="tag tag-fee">Fee</span>}
