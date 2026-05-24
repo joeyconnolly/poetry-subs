@@ -4,6 +4,9 @@ import { getCollection } from 'astro:content';
 
 const mags = await getCollection('magazines');
 
+// Extract unique prestige levels dynamically
+const uniquePrestiges = [...new Set(mags.map(mag => mag.data.prestige).filter(Boolean))].sort();
+
 // Sort the magazines in place before sending them to the HTML
 mags.sort((a, b) => {
     const isAOpen = a.data.status === 'Open';
@@ -53,11 +56,22 @@ mags.sort((a, b) => {
                 <option value="true">Paying Magazines Only</option>
             </select>
         </div>
+
+        <div class="filter-group">
+            <label for="filter-prestige">Prestige</label>
+            <select id="filter-prestige">
+                <option value="all">Any Prestige</option>
+                {uniquePrestiges.map((prestige) => (
+                    <option value={String(prestige).toLowerCase()}>{prestige}</option>
+                ))}
+            </select>
+        </div>
     </div>
 
     <div class="directory-header">
         <span class="col-name">Publication</span>
         <span class="col-status">Status</span>
+        <span class="col-prestige">Prestige</span>
         <span class="col-meta">Details</span>
     </div>
 
@@ -66,7 +80,8 @@ mags.sort((a, b) => {
             <li class="directory-item" 
                 data-status={mag.data.status.toLowerCase()} 
                 data-region={mag.data.region} 
-                data-pays={mag.data.pays !== undefined ? mag.data.pays.toString() : 'unknown'}>
+                data-pays={mag.data.pays !== undefined ? mag.data.pays.toString() : 'unknown'}
+                data-prestige={mag.data.prestige ? mag.data.prestige.toLowerCase() : 'unknown'}>
                 
                 <div class="col-name">
                     <h2 class="mag-title">
@@ -96,6 +111,10 @@ mags.sort((a, b) => {
                     <span class={`status badge-${mag.data.status.toLowerCase()}`}>{mag.data.status}</span>
                     {mag.data.deadline && <span class="deadline">Ends: {mag.data.deadline}</span>}
                 </div>
+
+                <div class="col-prestige">
+                    {mag.data.prestige && <span class="tag tag-prestige">{mag.data.prestige}</span>}
+                </div>
                 
                 <div class="col-meta">
                     {/* Only show region tag if it's not 'Unknown' */}
@@ -106,7 +125,7 @@ mags.sort((a, b) => {
                         <span class={`tag ${mag.data.pays ? 'tag-pays' : ''}`}>{mag.data.pays ? "Pays" : "Doesn't Pay"}</span>
                     )}
                     
-                    {mag.data.fee && <span class="tag tag-fee">Fee</span>}
+                    {mag.data.fee && <span class="tag tag-fee">Submission Fee</span>}
                 </div>
             </li>
         ))}
@@ -117,24 +136,28 @@ mags.sort((a, b) => {
     const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
     const filterRegion = document.getElementById('filter-region') as HTMLSelectElement;
     const filterPays = document.getElementById('filter-pays') as HTMLSelectElement;
+    const filterPrestige = document.getElementById('filter-prestige') as HTMLSelectElement;
     const items = document.querySelectorAll('.directory-item');
 
     function updateFilters() {
         const statusVal = filterStatus.value;
         const regionVal = filterRegion.value;
         const paysVal = filterPays.value;
+        const prestigeVal = filterPrestige.value;
 
         items.forEach((item) => {
             const li = item as HTMLElement;
             const itemStatus = li.getAttribute('data-status');
             const itemRegion = li.getAttribute('data-region');
             const itemPays = li.getAttribute('data-pays');
+            const itemPrestige = li.getAttribute('data-prestige');
 
             const matchesStatus = statusVal === 'all' || itemStatus === statusVal;
             const matchesRegion = regionVal === 'all' || itemRegion === regionVal;
             const matchesPays = paysVal === 'all' || itemPays === paysVal;
+            const matchesPrestige = prestigeVal === 'all' || itemPrestige === prestigeVal;
 
-            if (matchesStatus && matchesRegion && matchesPays) {
+            if (matchesStatus && matchesRegion && matchesPays && matchesPrestige) {
                 li.style.display = 'flex';
             } else {
                 li.style.display = 'none';
@@ -145,6 +168,7 @@ mags.sort((a, b) => {
     filterStatus.addEventListener('change', updateFilters);
     filterRegion.addEventListener('change', updateFilters);
     filterPays.addEventListener('change', updateFilters);
+    filterPrestige.addEventListener('change', updateFilters);
 </script>
 
 <style>
@@ -197,6 +221,7 @@ mags.sort((a, b) => {
     .directory-item:hover { background-color: rgba(0,0,0,0.02); }
     .col-name { flex: 2; padding-right: 1.5rem; }
     .col-status { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+    .col-prestige { flex: 1; display: flex; align-items: flex-start; }
     .col-meta { flex: 1; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-end; }
     
     .mag-title { font-size: 1.25rem; margin: 0; line-height: 1.3; }
@@ -215,6 +240,7 @@ mags.sort((a, b) => {
     .tag { font-size: 0.7rem; padding: 0.1rem 0.4rem; background: #f0eee4; border-radius: 3px; color: var(--muted); white-space: nowrap; }
     .tag-pays { background: #e6f4ea; color: #166534; border: 1px solid #bbf7d0; }
     .tag-fee { background: #fee2e2; color: var(--accent); border: 1px solid #fecaca;}
+    .tag-prestige { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
 
     /* =========================================
        TOOLTIP STYLES (Inline version)
@@ -300,7 +326,7 @@ mags.sort((a, b) => {
             padding: 1.5rem 0; 
         }
         
-        .col-name, .col-status, .col-meta {
+        .col-name, .col-status, .col-prestige, .col-meta {
             flex: none;
             width: 100%;
             padding-right: 0;

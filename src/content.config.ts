@@ -48,6 +48,7 @@ const magazines = defineCollection({
         fee: cleanBool(row.fee),
         description: cleanString(row.description),
         notes: cleanString(row.notes),
+        prestige: cleanString(row.prestige),
       };
     });
   },
@@ -62,6 +63,7 @@ const magazines = defineCollection({
     fee: z.boolean().optional(),
     description: z.string().optional(),
     notes: z.string().optional(),
+    prestige: z.string().optional(),
   }),
 });
 
